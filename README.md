@@ -1,6 +1,6 @@
 # scd 
 
-** A scheduling application implementation primarily through C - Work in Progress **
+**A scheduling application implementation primarily through C - Work in Progress**
 
 NOTES:
 1. For the format of base files check the samples in 'base' as references - and edit them as necessary  <br />

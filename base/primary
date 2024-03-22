@@ -1,0 +1,22 @@
+**Sun
+01 05:00 Event A
+01 17:00 Event F
+::ALT
+**Mon
+01 07:30 Event B
+01 19:30 Event G
+**Tue
+03 14:00 Event A
+01 17:00 Event C
+**Wed
+01 07:30 Event E
+01 08:00 Event H
+**Thu
+03 14:00 Event D
+02 21:00 Event B
+**Fri
+02 21:00 Event A
+03 22:00 Event C
+**Sat
+01 16:00 Event H
+01 18:00 Event G

@@ -33,7 +33,7 @@ NOTES:
    5.2 add d <block_> <time_> <day_> <month_> <year_> <mode_> <name_> <br> 
    5.3 add w <day_> <month_> <year_> <mode_> <name_> REMEMBER THIS DATE MUST BE A SUNDAY <br> 
    5.4 add m <month_> <year_> <mode_> <name_> <br> 
-   5.5 add s <day_s> <month_s> <year_s> <day_e> <month_e> <year_e> <mode> <name>  <br> <br>
+   5.5 add s <day_s> <month_s> <year_s> <day_e> <month_e> <year_e> <mode_> <name_>  <br> <br>
 
    For example <br><br>
    add p 1 02 07:00 00 Event A <br>

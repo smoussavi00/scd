@@ -43,9 +43,9 @@ NOTES:
 
    For example <br><br>
    add p 1 02 07:00 00 Event A <br>
-   (Every monday, for 60 minutes, starting 7:00 AM, mode 0 (ignore this), do Event A) <br><br>
+   (Every monday, for 60 minutes, starting at 7:00 AM, mode 0 (ignore this), do Event A) <br><br>
    add d 01 20:00 17 02 2024 00 Event B <br>
-   (On the 17th of February 2024, for 30 minutes, starting 8:00 PM, mode 0 (ignore this), do Event B) <br><br>
+   (On the 17th of February 2024, for 30 minutes, starting at 8:00 PM, mode 0 (ignore this), do Event B) <br><br>
    add w 11 02 2024 01 Commitment A <br>
    (For the week defined by its sunday on the 11th of February 2024, mode 1 (ignore this), you have Commitment A) <br><br>
    add m 03 2024 00 Commitment B  <br>

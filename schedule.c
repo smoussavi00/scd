@@ -11,10 +11,9 @@ int main(void){
     struct scd_item_w* scd_w = malloc(sizeof(*scd_w)*(nums->num_w)*2);
     struct scd_item_m* scd_m = malloc(sizeof(*scd_m)*(nums->num_m)*2);
     struct scd_item_s* scd_s = malloc(sizeof(*scd_s)*(nums->num_s)*2);
-    struct scd_item_docket* scd_docket = malloc(sizeof(*scd_docket)*(nums->num_docket)*2);
 
     struct secondaries* sec = malloc(sizeof(*sec));
-    sec->scd_d = scd_d; sec->scd_w = scd_w; sec->scd_m = scd_m; sec->scd_s = scd_s; sec->scd_docket = scd_docket;
+    sec->scd_d = scd_d; sec->scd_w = scd_w; sec->scd_m = scd_m; sec->scd_s = scd_s; 
 
     // TIME STRUCT
     struct tm* ct = malloc(sizeof(*ct));
@@ -25,13 +24,69 @@ int main(void){
     load_items_week(scd_w);
     load_items_month(scd_m);
     load_items_special(scd_s);
-    load_items_docket(scd_docket);
 
     load_tm(ct);
 
-    day_items(scd_p,sec,nums,ct->tm_mday,(ct->tm_mon)+1,(ct->tm_year)+1900);
+    int p = 0;
+    int pt;
+    int p_max = 0;
+    int p_min = 1;
+    
+    system("clear");
+    printf("\n\nSchedule Program (work in progress)\n\n'today' to see your schedule for today\n'next' or 'back' to navigate through pages\n'exit' to exit\n\n\n\n\nSCD - Welcome\n\n");
 
-    free(ct); free(scd_p); free(scd_d); free(scd_w); free(scd_m); free(scd_s); free(scd_docket); free(sec); free(nums);
+    while(1){
+        char buf[97];
+        fgets(buf, sizeof(buf), stdin);
+
+        if(strncmp(buf,"exit",4) == 0) break;
+
+        else if(strncmp(buf,"today",5) == 0){
+            p = 1;
+            system("clear");
+            pt = day_items(p,nums,scd_p,sec,ct->tm_mday,(ct->tm_mon)+1,(ct->tm_year)+1900);
+        }
+        else if(strncmp(buf,"next",4) == 0 && p < pt){
+            p++;
+            system("clear");
+            pt = day_items(p,nums,scd_p,sec,ct->tm_mday,(ct->tm_mon)+1,(ct->tm_year)+1900);
+        }
+        else if(strncmp(buf,"back",4) == 0 && p > 1){
+            p--;
+            system("clear");
+            pt = day_items(p,nums,scd_p,sec,ct->tm_mday,(ct->tm_mon)+1,(ct->tm_year)+1900);
+        }
+        else if(strncmp(buf,"add p",5) == 0){
+            buf[strcspn(buf, "\n")] = 0;
+            add_item_primary(nums,scd_p,atoi(buf+8),atoi(buf+11),atoi(buf+14),atoi(buf+6),buf+20,atoi(buf+17));
+        } 
+        else if(strncmp(buf,"add d",5) == 0){
+            buf[strcspn(buf, "\n")] = 0;
+            add_item_day(nums,sec,atoi(buf+6),atoi(buf+9),atoi(buf+12),atoi(buf+15),atoi(buf+18),atoi(buf+21),buf+29,atoi(buf+26));
+        } 
+        else if(strncmp(buf,"add w",5) == 0){
+            buf[strcspn(buf, "\n")] = 0;
+            add_item_week(nums,sec,atoi(buf+6),atoi(buf+9),atoi(buf+12),buf+20,atoi(buf+17));
+        }
+        else if(strncmp(buf,"add w",5) == 0){
+            buf[strcspn(buf, "\n")] = 0;
+            add_item_week(nums,sec,atoi(buf+6),atoi(buf+9),atoi(buf+12),buf+20,atoi(buf+17));
+        }
+        else if(strncmp(buf,"add m",5) == 0){
+            buf[strcspn(buf, "\n")] = 0;
+            add_item_month(nums,sec,atoi(buf+6),atoi(buf+9),buf+17,atoi(buf+14));
+        }
+        else if(strncmp(buf,"add s",5) == 0){
+            buf[strcspn(buf, "\n")] = 0;
+            add_item_special(nums,sec,atoi(buf+6),atoi(buf+9),atoi(buf+12),atoi(buf+17),atoi(buf+20),atoi(buf+23),buf+31,atoi(buf+28));
+        }
+
+    }
+    printf("\n");
+
+    commit_scd_count(nums); commit_items_primary(nums,scd_p); commit_items_day(nums,sec); commit_items_week(nums,sec); commit_items_month(nums,sec); commit_items_special(nums,sec);
+
+    free(ct); free(scd_p); free(scd_d); free(scd_w); free(scd_m); free(scd_s); free(sec); free(nums);
 
     return 0;
 }
@@ -94,9 +149,26 @@ int day_of_week(int d, int m, int y){
     return dw;
 }
 
-void get_clock(char* line, int* h, int* m){
-    *h = 10*(line[3]-'0') + line[4]-'0';
-    *m = 10*(line[6]-'0') + line[7]-'0';
+int compare_events_p(struct scd_item_p* scd_p, int a, int b){
+    struct scd_item_p* si_a = (void *) scd_p + sizeof(*scd_p)*a;
+    struct scd_item_p* si_b = (void *) scd_p + sizeof(*scd_p)*b;
+
+    if(si_a->hour < si_b->hour || (si_a->hour == si_b->hour && si_a->min < si_b->min)) return 1;
+    else return 0;
+}
+
+int compare_events_d(struct secondaries* sec, int a, int b){
+    struct scd_item_p* si_a = (void *) sec->scd_d + sizeof(*(sec->scd_d))*a;
+    struct scd_item_p* si_b = (void *) sec->scd_d + sizeof(*(sec->scd_d))*b;
+
+    if(si_a->hour < si_b->hour || (si_a->hour == si_b->hour && si_a->min < si_b->min)) return 1;
+    else return 0;
+}
+
+
+void get_clock(char* line, int* h, int* m, int off){
+    *h = 10*(line[3+off]-'0') + line[4+off]-'0';
+    *m = 10*(line[6+off]-'0') + line[7+off]-'0';
 }
 
 void day_of_week_convert(int dw, char* dw_s, int abv){
@@ -137,24 +209,22 @@ void month_convert(int mn, char* mn_s){
 
 void time_convert(int h, int m, char* time_s){
 
-    time_s[0] = '(';
     if(h<10){
-        time_s[1] = '0';
-        time_s[2] = h+'0';
+        time_s[0] = '0';
+        time_s[1] = h+'0';
     } else {
-        time_s[1] = (h-(h%10))/10 + '0';
-        time_s[2] = (h%10)+'0'; 
+        time_s[0] = (h-(h%10))/10 + '0';
+        time_s[1] = (h%10)+'0'; 
     }
-    time_s[3] = ':';
+    time_s[2] = ':';
     if(m<10){
-        time_s[4] = '0';
-        time_s[5] = m+'0';
+        time_s[3] = '0';
+        time_s[4] = m+'0';
     } else {
-        time_s[4] = (m-(m%10))/10 + '0';
-        time_s[5] = (m%10)+'0'; 
+        time_s[3] = (m-(m%10))/10 + '0';
+        time_s[4] = (m%10)+'0'; 
     }
-    time_s[6]=')';
-    time_s[7]='\0';
+    time_s[5]='\0';
 }
 
 
@@ -184,7 +254,6 @@ void mode_colour(int m, char* col){
 
 void load_items_primary(struct scd_item_p* scd_p){
     
-
     struct scd_item_p* csi = NULL;
     int scd_len = sizeof(*scd_p);
 
@@ -192,9 +261,7 @@ void load_items_primary(struct scd_item_p* scd_p){
     FILE* fp;
     char line[53];
 
-    int fl_alt = 0;
     int n = 0;
-    int dw = -1;
 
     fp = fopen("base/primary","r");
 
@@ -203,33 +270,21 @@ void load_items_primary(struct scd_item_p* scd_p){
         csi = (void *) scd_p + scd_len*n;
         line[strcspn(line, "\n")] = 0;
 
-        if(strcmp(line,"::ALT") == 0) {
-            fl_alt = 1;
-            continue;   
-        }
+        csi->day_of_week = line[0]-'0';
+        csi->block = 10*(line[2]-'0')+(line[3]-'0');
 
-        if(strncmp("**",line,2) == 0){
-            dw++;
-            continue;
-        }
+        csi->mode = 10*(line[11]-'0')+(line[12]-'0');
 
-        csi->mode = 0;
-        csi->day_of_week = dw;
-        csi->block = 10*(line[0]-'0')+(line[1]-'0');
+        get_clock(line,&(csi->hour),&(csi->min),2);   
+        strcpy(csi->name,line+14);
 
-        get_clock(line,&(csi->hour),&(csi->min));
-        strcpy(csi->name,line+9);
-
-        if(fl_alt == 1){
-            fl_alt = 0;
-            csi->mode += 1;
-        }
         n++;
     }
     fclose(fp);
 }
 
 void load_items_day(struct scd_item_d* scd_d){
+
     struct scd_item_d* csi = NULL;
     int scd_len = sizeof(*scd_d);
 
@@ -242,24 +297,18 @@ void load_items_day(struct scd_item_d* scd_d){
 
     while(fgets(line,53,fp)){
 
-        int day, month, year;
-
         csi = (void *) scd_d + scd_len*n;
         line[strcspn(line, "\n")] = 0;
 
-        if(strncmp("**",line,2) == 0){
-            day = 10*(line[3]-'0') + (line[4]-'0');
-            month = 10*(line[6]-'0') + (line[7]-'0');
-            year = 1000*(line[9]-'0') + 100*(line[10]-'0') + 10*(line[11]-'0') + (line[12]-'0');
-            continue;
-        }
-
-        csi->mode = 0;
-        csi->day = day; csi->month = month; csi->year = year;
+        csi->day = 10*(line[9]-'0') + (line[10]-'0');
+        csi->month = 10*(line[12]-'0') + (line[13]-'0');
+        csi->year = 1000*(line[15]-'0') + 100*(line[16]-'0') + 10*(line[17]-'0') + (line[18]-'0');
+        
+        csi->mode = 10*(line[20]-'0')+(line[21]-'0');
         csi->block = 10*(line[0]-'0')+(line[1]-'0');
 
-        get_clock(line,&(csi->hour),&(csi->min));
-        strcpy(csi->name,line+9);
+        get_clock(line,&(csi->hour),&(csi->min),0);
+        strcpy(csi->name,line+23);
 
         n++;
     }
@@ -267,6 +316,7 @@ void load_items_day(struct scd_item_d* scd_d){
 }
 
 void load_items_week(struct scd_item_w* scd_w){
+
     struct scd_item_w* csi = NULL;
     int scd_len = sizeof(*scd_w);
 
@@ -279,21 +329,16 @@ void load_items_week(struct scd_item_w* scd_w){
 
     while(fgets(line,53,fp)){
         
-        int day, month, year;
-
         csi = (void *) scd_w + scd_len*n;
         line[strcspn(line, "\n")] = 0;
 
-        if(strncmp("**",line,2) == 0){
-            day = 10*(line[3]-'0') + (line[4]-'0');
-            month = 10*(line[6]-'0') + (line[7]-'0');
-            year = 1000*(line[9]-'0') + 100*(line[10]-'0') + 10*(line[11]-'0') + (line[12]-'0');
-            continue;
-        }
+        csi->day = 10*(line[0]-'0') + (line[1]-'0');
+        csi->month = 10*(line[3]-'0') + (line[4]-'0');
+        csi->year = 1000*(line[6]-'0') + 100*(line[7]-'0') + 10*(line[8]-'0') + (line[9]-'0');
 
-        csi->mode = 0;
-        csi->day = day; csi->month = month; csi->year = year;
-        strcpy(csi->name,line);
+        csi->mode = 10*(line[11]-'0')+(line[12]-'0');
+
+        strcpy(csi->name,line+14);
 
         n++;
     }
@@ -301,6 +346,7 @@ void load_items_week(struct scd_item_w* scd_w){
 }
 
 void load_items_month(struct scd_item_m* scd_m){
+
    struct scd_item_m* csi = NULL;
     int scd_len = sizeof(*scd_m);
 
@@ -313,20 +359,15 @@ void load_items_month(struct scd_item_m* scd_m){
 
     while(fgets(line,53,fp)){
         
-        int month, year;
-
         csi = (void *) scd_m + scd_len*n;
         line[strcspn(line, "\n")] = 0;
 
-        if(strncmp("**",line,2) == 0){
-            month = 10*(line[3]-'0') + (line[4]-'0');
-            year = 1000*(line[6]-'0') + 100*(line[7]-'0') + 10*(line[8]-'0') + (line[9]-'0');
-            continue;
-        }
+        csi->month = 10*(line[0]-'0') + (line[1]-'0');
+        csi->year = 1000*(line[3]-'0') + 100*(line[4]-'0') + 10*(line[5]-'0') + (line[6]-'0');
 
-        csi->mode = 0;
-        csi->month = month; csi->year = year;
-        strcpy(csi->name,line);
+        csi->mode = 10*(line[8]-'0')+(line[9]-'0');
+
+        strcpy(csi->name,line+11);
 
         n++;
     }
@@ -346,81 +387,39 @@ void load_items_special(struct scd_item_s* scd_s){
     fp = fopen("base/sec_special","r");
 
     while(fgets(line,53,fp)){
-        
-        int day_s, month_s, year_s;
-        int day_e, month_e, year_e;
 
         csi = (void *) scd_s + scd_len*n;
         line[strcspn(line, "\n")] = 0;
 
-        if(strncmp("**",line,2) == 0){
-            day_s = 10*(line[3]-'0') + (line[4]-'0');
-            month_s = 10*(line[6]-'0') + (line[7]-'0');
-            year_s = 1000*(line[9]-'0') + 100*(line[10]-'0') + 10*(line[11]-'0') + (line[12]-'0');
-            day_e = 10*(line[14]-'0') + (line[15]-'0');
-            month_e = 10*(line[17]-'0') + (line[18]-'0');
-            year_e = 1000*(line[20]-'0') + 100*(line[21]-'0') + 10*(line[22]-'0') + (line[23]-'0');
-            continue;
-        }
+        csi->day_s = 10*(line[0]-'0') + (line[1]-'0');
+        csi->month_s = 10*(line[3]-'0') + (line[4]-'0');
+        csi->year_s = 1000*(line[6]-'0') + 100*(line[7]-'0') + 10*(line[8]-'0') + (line[9]-'0');
+        csi->day_e = 10*(line[11]-'0') + (line[12]-'0');
+        csi->month_e = 10*(line[14]-'0') + (line[15]-'0');
+        csi->year_e = 1000*(line[17]-'0') + 100*(line[18]-'0') + 10*(line[19]-'0') + (line[20]-'0');
 
-        csi->mode = 0;
-        csi->day_s = day_s; csi->month_s = month_s; csi->year_s = year_s;
-        csi->day_e = day_e; csi->month_e = month_e; csi->year_e = year_e;
-        strcpy(csi->name,line);
+        csi->mode = 10*(line[22]-'0')+(line[23]-'0');
+
+        strcpy(csi->name,line+25);
 
         n++;
     }
     fclose(fp);
 }
 
-void load_items_docket(struct scd_item_docket* scd_docket){
-    struct scd_item_docket* csi = NULL;
-    int scd_len = sizeof(*scd_docket);
-
-    FILE *fp;
-    char line[373];
-
-    int n = 0;
-
-    fp = fopen("base/sec_docket","r");
-
-    while(fgets(line,373,fp)){
-
-        int day, month, year;
-
-        csi = (void *) scd_docket + scd_len*n;
-        line[strcspn(line, "\n")] = 0;
-
-        if(strncmp("**",line,2) == 0){
-            day = 10*(line[3]-'0') + (line[4]-'0');
-            month = 10*(line[6]-'0') + (line[7]-'0');
-            year = 1000*(line[9]-'0') + 100*(line[10]-'0') + 10*(line[11]-'0') + (line[12]-'0');
-            continue;
-        }
-
-        strncpy(csi->name,line,strlen(line));
-        csi->day = day; csi->month = month; csi->year = year;
- 
-        n++;
-    }
-    fclose(fp);
-}
-
-void day_items(struct scd_item_p* scd_p, struct secondaries* sec, struct scd_count* nums, int d, int m, int y){
+int day_items(int page, struct scd_count* nums, struct scd_item_p* scd_p, struct secondaries* sec, int d, int m, int y){
     
-    struct scd_item_p *csi_p = NULL;
-    struct scd_item_d *csi_d = NULL;
-    struct scd_item_w *csi_w = NULL;
-    struct scd_item_m *csi_m = NULL;
-    struct scd_item_s *csi_s = NULL;
-    struct scd_item_docket *csi_docket = NULL;
+    struct scd_item_p* csi_p = NULL;
+    struct scd_item_d* csi_d = NULL;
+    struct scd_item_w* csi_w = NULL;
+    struct scd_item_m* csi_m = NULL;
+    struct scd_item_s* csi_s = NULL;
 
     int scd_p_len = sizeof(*scd_p);
     int scd_d_len = sizeof(*(sec->scd_d));
     int scd_w_len = sizeof(*(sec->scd_w));
     int scd_m_len = sizeof(*(sec->scd_m));
     int scd_s_len = sizeof(*(sec->scd_s));
-    int scd_docket_len = sizeof(*(sec->scd_docket));
 
     int dw = day_of_week(d,m,y);
 
@@ -428,10 +427,21 @@ void day_items(struct scd_item_p* scd_p, struct secondaries* sec, struct scd_cou
     char col[11];
     char time_s[11];
     int has_entry = 0;
+    int has_also = 0;
 
     day_of_week_convert(dw,dw_s,0);
 
-    printf("\n%sSchedule for %s%s\n\n",BWHT,dw_s,COLOUR_RESET);
+    int ps = 13;
+    int c = 0;
+    int min = (page-1)*(ps-6);
+    int max = page*(ps-6)-1;
+
+    int l1[37];
+    int l2[37];
+
+    int k = 0;
+
+    printf("\n%sSchedule for %s%s\n\n",BWHT,dw_s,COLOUR_RESET); 
 
     for(int x = 0; x < nums->num_p; x++){
         csi_p = (void *) scd_p + scd_p_len*x;
@@ -440,12 +450,13 @@ void day_items(struct scd_item_p* scd_p, struct secondaries* sec, struct scd_cou
         time_convert(csi_p->hour,csi_p->min,time_s);
 
         if(csi_p->day_of_week == dw){
+            if(has_also == 0) has_also++;
+            l1[k] = x; k++;
             has_entry = 1;
-            printf("%s\t%s%s%s %s\n",time_s,COLOUR_RESET,col,csi_p->name,COLOUR_RESET);
         } 
     }
-    if(has_entry) printf("\n");
-    has_entry = 0;
+
+    int k2 = 0;
 
     for(int x = 0; x < nums->num_d; x++){
         csi_d = (void *) sec->scd_d + scd_d_len*x;
@@ -454,39 +465,71 @@ void day_items(struct scd_item_p* scd_p, struct secondaries* sec, struct scd_cou
         time_convert(csi_d->hour,csi_d->min,time_s);
 
         if((csi_d->day == d) && (csi_d->month == m)  && (csi_d->year == y)){
-            printf("%s\t%s%s%s %s\n",time_s,COLOUR_RESET,col,csi_d->name,COLOUR_RESET);
+            if(has_also == 1) has_also++;
+            l2[k2] = x; k2++;
             has_entry = 1;
         }
     }
-    if(has_entry) printf("\n");
-    has_entry = 0;
 
-    char buff[53];
+    int min_1;
+    int min_index_1;
+    int min_2;
+    int min_index_2;
+    int temp;
 
+    for(int i = 0; i < k-1; i++){
+        min_1 = l1[i];
+        min_index_1 = i;
 
-    for(int x = 0; x < nums->num_docket; x++){
-        csi_docket = (void *) sec->scd_docket + scd_docket_len*x;
-
-        int j = 0;
-        int start = 0;
-
-        if((csi_docket->day == d) && (csi_docket->month == m)  && (csi_docket->year == y)){
-            for(int y = 0; y < 371; y++){
-                if((csi_docket->name)[y] != ',' && (csi_docket->name)[y] != '\0') j++;
-                else {
-                    strncpy(buff, &((csi_docket->name)[start]), j);
-                    j = 0;
-                    start = y + 1;
-                    printf("\t%s\n",buff);
-                    memset(buff,0,strlen(buff));
-                    if(csi_docket->name[y] == '\0') break;
-                }
-            }
-            has_entry = 1;
-        }
+        for(int j = i; j < k; j++){
+            if(compare_events_p(scd_p,l1[j],min_1)){
+                min_1 = l1[j];
+                min_index_1 = j;
+            } 
+        }   
+        temp = l1[i];
+        l1[i] = min_1;
+        l1[min_index_1] = temp;
     }
-    if(has_entry) printf("\n");
-    has_entry = 0;    
+
+    for(int i = 0; i < k2-1; i++){
+        min_2 = l2[i];
+        min_index_2 = i;
+
+        for(int j = i; j < k2; j++){
+            if(compare_events_d(sec,l2[j],min_2)){
+                min_2 = l2[j];
+                min_index_2 = j;
+            } 
+        }   
+        temp = l2[i];
+        l2[i] = min_2;
+        l2[min_index_2] = temp;
+    }
+    
+    for(int i = 0 ; i < k; i++){
+        mode_colour(csi_p->mode,col);
+        time_convert(csi_p->hour,csi_p->min,time_s);
+        if(c >= min && c <= max) printf("  %s\t%s%s%s %s\n",time_s,COLOUR_RESET,col,csi_p->name,COLOUR_RESET);
+        c++;
+        csi_p = (void *) scd_p + scd_p_len*(l1[i]);   
+    }
+
+    if(has_also == 2 && c >= min && c <= max){
+        printf("\n");  
+    } c++;
+
+    for(int i = 0 ; i < k2; i++){
+        mode_colour(csi_d->mode,col);
+        time_convert(csi_d->hour,csi_d->min,time_s);
+        if(c >= min && c <= max) printf("  %s\t%s%s%s %s\n",time_s,COLOUR_RESET,col,csi_d->name,COLOUR_RESET);
+        c++;
+        csi_d = (void *) (sec->scd_d) + scd_d_len*(l2[i]);  
+    }
+
+    if(has_entry && c >= min && c <= max){
+        printf("\n");  
+    } c++;
 
     int d_sun, m_sun, y_sun;
     nearest_sunday(d,m,y,&d_sun,&m_sun,&y_sun);
@@ -497,12 +540,10 @@ void day_items(struct scd_item_p* scd_p, struct secondaries* sec, struct scd_cou
         mode_colour(csi_w->mode,col);
 
         if((csi_w->day == d_sun) && (csi_w->month == m_sun)  && (csi_w->year == y_sun)){
-            printf("(WEEK )\t%s%s%s %s\n",COLOUR_RESET,col,csi_w->name,COLOUR_RESET);
-            has_entry = 1;
+            if(c >= min && c <= max) printf("   WEEK\t%s%s%s %s\n",COLOUR_RESET,col,csi_w->name,COLOUR_RESET);
+            c++;
         }
     }
-    if(has_entry) printf("\n");
-    has_entry = 0;
 
     for(int x = 0; x < nums->num_m; x++){
         csi_m = (void *) sec->scd_m + scd_m_len*x;
@@ -510,27 +551,120 @@ void day_items(struct scd_item_p* scd_p, struct secondaries* sec, struct scd_cou
         mode_colour(csi_m->mode,col);
 
         if(csi_m->month == m){ 
-            printf("(MONTH)\t%s%s%s %s\n",COLOUR_RESET,col,csi_m->name,COLOUR_RESET);
-            has_entry = 1;
+            if(c >= min && c <= max) printf("  MONTH\t%s%s%s %s\n",COLOUR_RESET,col,csi_m->name,COLOUR_RESET);
+            c++;
         }
     }
-    if(has_entry) printf("\n");
-    has_entry = 0;
 
-    for(int x = 0; x < nums->num_m; x++){
+    for(int x = 0; x < nums->num_s; x++){
         csi_s = (void *) sec->scd_s + scd_s_len*x;
 
         mode_colour(csi_s->mode,col);
-
         if(within_range(csi_s,d,m,y)){
-            printf("(SPECL)\t%s%s%s %s\n",COLOUR_RESET,col,csi_s->name,COLOUR_RESET);
-            has_entry = 1;
-        }
-        
+            if(c >= min && c <= max) printf("   SPEC\t%s%s%s %s\n",COLOUR_RESET,col,csi_s->name,COLOUR_RESET);
+            c++;
+        }    
     }
-    if(has_entry) printf("\n");
+
+    if(page == (c-1)/(ps-6)+1){
+        for(int x = 0; x < (ps-6)-(c%(ps-6)); x++){
+            printf("\n");
+        }
+    }
+
+    printf("\n%sPage %i/%i%s\t\n\n",BWHT,page,(c-1)/(ps-6)+1,COLOUR_RESET);
+
+    return (c-1)/(ps-6)+1;
+}
+
+void add_item_primary(struct scd_count* nums, struct scd_item_p* scd_p, int block, int hour, int min, int day_of_week, char* name, int mode){
+    
+    struct scd_item_p* csi = NULL;
+    int scd_p_len = sizeof(*scd_p);
+
+    csi = (void *) scd_p + scd_p_len*(nums->num_p);
+    nums->num_p++;
+
+    csi->block = block;
+    csi->hour = hour;
+    csi->min = min;
+    csi->day_of_week = day_of_week;
+
+    strncpy(csi->name,name,strlen(name));
+    csi->mode = mode;
 
 }
+
+void add_item_day(struct scd_count* nums, struct secondaries* sec, int block, int hour,  int min, int day, int month, int year, char* name, int mode){
+    
+    struct scd_item_d* csi = NULL;
+    int scd_d_len = sizeof(*(sec->scd_d));
+
+    csi = (void *) sec->scd_d + scd_d_len*(nums->num_d);
+    nums->num_d++;
+
+    csi->block = block;
+    csi->hour = hour;
+    csi->min = min;
+    csi->day = day;
+    csi->month = month;
+    csi->year = year;
+
+    strncpy(csi->name,name,strlen(name));
+    csi->mode = mode;
+}
+
+void add_item_week(struct scd_count* nums, struct secondaries* sec, int day, int month, int year, char* name, int mode){
+    
+    struct scd_item_w* csi = NULL;
+    int scd_w_len = sizeof(*(sec->scd_w));
+
+    csi = (void *) sec->scd_w + scd_w_len*(nums->num_w);
+    nums->num_w++;
+
+    csi->day = day;
+    csi->month = month;
+    csi->year = year;
+
+    strncpy(csi->name,name,strlen(name));
+    csi->mode = mode;
+}
+
+void add_item_month(struct scd_count* nums, struct secondaries* sec, int month, int year, char* name, int mode){
+    
+    struct scd_item_m* csi = NULL;
+    int scd_m_len = sizeof(*(sec->scd_m));
+
+    csi = (void *) sec->scd_m + scd_m_len*(nums->num_m);
+    nums->num_m++;
+
+    csi->month = month;
+    csi->year = year;
+
+    strncpy(csi->name,name,strlen(name));
+    csi->mode = mode;
+}
+
+void add_item_special(struct scd_count* nums, struct secondaries* sec, int day_s, int month_s, int year_s, int day_e, int month_e, int year_e, char* name, int mode){
+    
+    struct scd_item_s* csi = NULL;
+    int scd_s_len = sizeof(*(sec->scd_s));
+
+    csi = (void *) (sec->scd_s) + scd_s_len*(nums->num_s);
+    nums->num_s++;
+
+    csi->day_s = day_s;
+    csi->month_s = month_s;
+    csi->year_s = year_s;
+    csi->day_e = day_e;
+    csi->month_e = month_e;
+    csi->year_e = year_e;
+
+
+    strncpy(csi->name,name,strlen(name));
+    csi->mode = mode;
+}
+
 
 void load_tm(struct tm* ct){
 
@@ -543,16 +677,212 @@ void load_tm(struct tm* ct){
     strptime(current_time_s, "%a %h %d %H:%M:%S %Y", ct);
 }
 
+void del_item_primary(struct scd_count* nums, struct scd_item_p* scd_p, int i){
+    
+    struct scd_item_p* csi = NULL;
+    int scd_p_len = sizeof(*scd_p);
+    int buffer_size_p = scd_p_len*(nums->num_p)*2;
 
-//if(x!=0) if(csi->day_of_week != (scd + scd_len*(x-1))->day_of_week ) printf("\n");
-/*
-    char cmd[53];
+    csi = (void *) scd_p + scd_p_len*i;
 
-    while(1){
-        scanf("%s",cmd);
-        if(strcmp(cmd,"exit") == 0) break;
-        if(strcmp(cmd,"show today") == 0) day_items(scd_p,ct.tm_wday,num);
-        //if(strcmp(cmd,"show week ag:"))
-        
-    } 
-*/
+    memmove(csi,(void *)csi+scd_p_len,buffer_size_p-(i+1)*scd_p_len);
+
+    nums->num_p--;
+}
+
+void del_item_day(struct scd_count* nums, struct secondaries* sec, int i){
+
+    struct scd_item_d* csi = NULL;
+    int scd_d_len = sizeof(*(sec->scd_d));
+
+    int buffer_size_d = scd_d_len*(nums->num_d)*2;
+
+    csi = (void *) (sec->scd_d) + scd_d_len*i;
+
+    memmove(csi,(void *)csi+scd_d_len,buffer_size_d-(i+1)*scd_d_len);
+
+    nums->num_d--;
+}
+
+void del_item_week(struct scd_count* nums, struct secondaries* sec, int i){
+
+    struct scd_item_w* csi = NULL;
+    int scd_w_len = sizeof(*(sec->scd_w));
+
+    int buffer_size_w = scd_w_len*(nums->num_w)*2;
+
+    csi = (void *) (sec->scd_w) + scd_w_len*i;
+
+    memmove(csi,(void *)csi+scd_w_len,buffer_size_w-(i+1)*scd_w_len);
+
+    nums->num_w--;
+}
+
+void del_item_month(struct scd_count* nums, struct secondaries* sec, int i){
+
+    struct scd_item_m* csi = NULL;
+    int scd_m_len = sizeof(*(sec->scd_m));
+
+    int buffer_size_m = scd_m_len*(nums->num_m)*2;
+
+    csi = (void *) (sec->scd_m) + scd_m_len*i;
+
+    memmove(csi,(void *)csi+scd_m_len,buffer_size_m-(i+1)*scd_m_len);
+
+    nums->num_s--;
+}
+
+void del_item_special(struct scd_count* nums, struct secondaries* sec, int i){
+
+    struct scd_item_s* csi = NULL;
+    int scd_s_len = sizeof(*(sec->scd_s));
+
+    int buffer_size_s = scd_s_len*(nums->num_s)*2;
+
+    csi = (void *) (sec->scd_s) + scd_s_len*i;
+
+    memmove(csi,(void *)csi+scd_s_len,buffer_size_s-(i+1)*scd_s_len);
+
+    nums->num_s--;
+}
+
+void commit_items_primary(struct scd_count* nums, struct scd_item_p* scd_p){
+
+    FILE *fp;
+    fp = fopen("base/primary","w");
+
+    struct scd_item_p* csi = NULL;
+    int scd_p_len = sizeof(*scd_p);
+
+    for(int i = 0 ; i < nums->num_p; i++){
+        csi = (void *) scd_p + scd_p_len*i;
+
+        fprintf(fp,"%i ",csi->day_of_week);
+        if(csi->block < 10) fprintf(fp,"0%i ",csi->block); else fprintf(fp,"%i ",csi->block);
+        if(csi->hour < 10) fprintf(fp,"0%i:",csi->hour); else fprintf(fp,"%i:",csi->hour);
+        if(csi->min < 10) fprintf(fp,"0%i ",csi->min); else fprintf(fp,"%i ",csi->min);
+        if(csi->mode < 10) fprintf(fp,"0%i ",csi->mode); else fprintf(fp,"%i ",csi->mode);
+        fprintf(fp,"%s",csi->name);
+
+        if(nums->num_p - 1 != i) fprintf(fp,"\n");
+    }
+
+    fclose(fp);
+}
+
+void commit_items_day(struct scd_count* nums, struct secondaries* sec){
+
+    FILE *fp;
+    fp = fopen("base/sec_day","w");
+
+    struct scd_item_d* csi = NULL;
+    int scd_d_len = sizeof(*(sec->scd_d));
+
+
+    for(int i = 0 ; i < nums->num_d; i++){
+        csi = (void *) (sec->scd_d) + scd_d_len*i;
+
+        if(csi->block < 10) fprintf(fp,"0%i ",csi->block); else fprintf(fp,"%i ",csi->block);
+        if(csi->hour < 10) fprintf(fp,"0%i:",csi->hour); else fprintf(fp,"%i:",csi->hour);
+        if(csi->min < 10) fprintf(fp,"0%i ",csi->min); else fprintf(fp,"%i ",csi->min);
+        if(csi->day < 10) fprintf(fp,"0%i ",csi->day); else fprintf(fp,"%i ",csi->day);
+        if(csi->month < 10) fprintf(fp,"0%i ",csi->month); else fprintf(fp,"%i ",csi->month);
+        if(csi->year < 10) fprintf(fp,"000%i ",csi->year);
+        else if(csi->year < 100) fprintf(fp,"00%i ",csi->year);
+        else if(csi->year < 1000) fprintf(fp,"0%i ",csi->year);
+        else fprintf(fp,"%i ",csi->year);
+        if(csi->mode < 10) fprintf(fp,"0%i ",csi->mode); else fprintf(fp,"%i ",csi->mode);
+
+        fprintf(fp,"%s",csi->name);
+
+        if(nums->num_d - 1 != i) fprintf(fp,"\n");
+    }
+
+    fclose(fp);
+}
+
+void commit_items_week(struct scd_count* nums, struct secondaries* sec){
+
+    FILE *fp;
+    fp = fopen("base/sec_week","w");
+
+    struct scd_item_w* csi = NULL;
+    int scd_w_len = sizeof(*(sec->scd_w));
+
+    for(int i = 0 ; i < nums->num_w; i++){
+        csi = (void *) (sec->scd_w) + scd_w_len*i;
+
+        if(csi->day < 10) fprintf(fp,"0%i ",csi->day); else fprintf(fp,"%i ",csi->day);
+        if(csi->month < 10) fprintf(fp,"0%i ",csi->month); else fprintf(fp,"%i ",csi->month);
+        if(csi->year < 10) fprintf(fp,"000%i ",csi->year);
+        else if(csi->year < 100) fprintf(fp,"00%i ",csi->year);
+        else if(csi->year < 1000) fprintf(fp,"0%i ",csi->year);
+        else fprintf(fp,"%i ",csi->year);
+        if(csi->mode < 10) fprintf(fp,"0%i ",csi->mode); else fprintf(fp,"%i ",csi->mode);
+
+        fprintf(fp,"%s",csi->name);
+
+        if(nums->num_w - 1 != i) fprintf(fp,"\n");
+    }
+
+    fclose(fp);
+}
+
+void commit_items_month(struct scd_count* nums, struct secondaries* sec){
+
+    FILE *fp;
+    fp = fopen("base/sec_month","w");
+
+    struct scd_item_m* csi = NULL;
+    int scd_m_len = sizeof(*(sec->scd_m));
+
+    for(int i = 0 ; i < nums->num_m; i++){
+        csi = (void *) (sec->scd_m) + scd_m_len*i;
+
+        if(csi->month < 10) fprintf(fp,"0%i ",csi->month); else fprintf(fp,"%i ",csi->month);
+        if(csi->year < 10) fprintf(fp,"000%i ",csi->year);
+        else if(csi->year < 100) fprintf(fp,"00%i ",csi->year);
+        else if(csi->year < 1000) fprintf(fp,"0%i ",csi->year);
+        else fprintf(fp,"%i ",csi->year);
+        if(csi->mode < 10) fprintf(fp,"0%i ",csi->mode); else fprintf(fp,"%i ",csi->mode);
+
+        fprintf(fp,"%s",csi->name);
+
+        if(nums->num_m - 1 != i) fprintf(fp,"\n");
+    }
+
+    fclose(fp);
+}
+
+void commit_items_special(struct scd_count* nums, struct secondaries* sec){
+
+    FILE *fp;
+    fp = fopen("base/sec_special","w");
+
+    struct scd_item_s* csi = NULL;
+    int scd_s_len = sizeof(*(sec->scd_s));
+
+    for(int i = 0 ; i < nums->num_s; i++){
+        csi = (void *) (sec->scd_s) + scd_s_len*i;
+
+        if(csi->day_s < 10) fprintf(fp,"0%i ",csi->day_s); else fprintf(fp,"%i ",csi->day_s);
+        if(csi->month_s < 10) fprintf(fp,"0%i ",csi->month_s); else fprintf(fp,"%i ",csi->month_s);
+        if(csi->year_s < 10) fprintf(fp,"000%i ",csi->year_s);
+        else if(csi->year_s < 100) fprintf(fp,"00%i ",csi->year_s);
+        else if(csi->year_s < 1000) fprintf(fp,"0%i ",csi->year_s);
+        else fprintf(fp,"%i ",csi->year_s);
+        if(csi->day_e < 10) fprintf(fp,"0%i ",csi->day_e); else fprintf(fp,"%i ",csi->day_e);
+        if(csi->month_e < 10) fprintf(fp,"0%i ",csi->month_e); else fprintf(fp,"%i ",csi->month_e);
+        if(csi->year_e < 10) fprintf(fp,"000%i ",csi->year_e);
+        else if(csi->year_e < 100) fprintf(fp,"00%i ",csi->year_e);
+        else if(csi->year_e < 1000) fprintf(fp,"0%i ",csi->year_e);
+        else fprintf(fp,"%i ",csi->year_e);        
+        if(csi->mode < 10) fprintf(fp,"0%i ",csi->mode); else fprintf(fp,"%i ",csi->mode);
+
+        fprintf(fp,"%s",csi->name);
+
+        if(nums->num_s - 1 != i) fprintf(fp,"\n");
+    }
+
+    fclose(fp);
+}

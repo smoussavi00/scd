@@ -5,7 +5,7 @@
 NOTES:
 
 1. There is no error checking for the 'add' commands, for now make sure your command is formatted correctly. This will be handled soon. 
-2. Deletion is not available yet. For now, go to the base files and remove any entry you don't like and update the corresponding number of entries in the counts file in the total directory. (If you don't update the <num_> values in total/counts, don't remove anything at all - you will get undefined behaviour) 
+2. Deletion is not available yet. You can go to the base files and remove any entry you don't like and update the corresponding number of entries in the counts file in the total directory. (If you don't update the <num_> values in total/counts, don't remove anything at all - you will get undefined behaviour) 
 3. There are five types of schedule items:
    \
    3.1 -primary, p- are the weekly repeating events (e.g. every sunday such and such event takes place) \

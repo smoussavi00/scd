@@ -17,7 +17,7 @@ NOTES:
 4. Schedule items can contain the follow fields (including format)     <br>
    4.1 name: max 37 characters     <br>
    4.2 block: 01-48 <br>
-   -- duration in number of consecutive 30-second blocks, applicable only to primary and day items (e.g. block = 03 = event is 90 mins)    <br>
+   -- duration in number of consecutive 30-second blocks, applicable only to primary and day items (e.g. block = 03 -> event is 90 mins)    <br>
    4.3 time: 00:00-23:59 <br>
    -- military time (e.g. 07:05 or 17:05)    <br>
    4.4 day_of_week: 0-6 <br>

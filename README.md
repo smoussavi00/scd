@@ -16,19 +16,25 @@ NOTES:
 
 4. Schedule items can contain the follow fields (including format)     <br>
    4.1 name: max 37 characters     <br>
-   4.2 block: 01-48, duration in number of consecutive 30-second blocks, applicable only to primary and day items (e.g. block = 03 means an event takes 90 minutes)    <br>
-   4.3 time: 00:00-23:59, military time (e.g. 07:05 or 17:05)    <br>
-   4.4 day_of_week: 0-6, where 0 represents Sunday, applicable only to primary items <br>
-   4.5 mode: 00-63, leave at 0 for most things, no definite functionality other than cool colours, will be useful later <br>
+   4.2 block: 01-48 <br>
+   -- duration in number of consecutive 30-second blocks, applicable only to primary and day items (e.g. block = 03 = event is 90 mins)    <br>
+   4.3 time: 00:00-23:59 <br>
+   -- military time (e.g. 07:05 or 17:05)    <br>
+   4.4 day_of_week: 0-6 <br>
+   -- where 0 represents Sunday, applicable only to primary items <br>
+   4.5 mode: 00-63 <br>
+   -- leave at 0 for most things, no definite functionality other than cool colours, will be useful later <br>
    4.6 day: 00-31 <br>
    4.7 month: 01-12 <br> 
    4.8 year: 0000-9999 <br>
-   4.9 day_s, month_s, year_s: starting date (observes same format as 4.6 - 4.8), inclusive, applicable only to special items <br>
-   4.10 day_e, month_e, year_e: ending date (observes same format as 4.6 - 4.8), inclusive, applicable only to special items <br>
+   4.9 day_s, month_s, year_s: (observes same format as 4.6 - 4.8) <br>
+   -- starting date, inclusive, applicable only to special items <br>
+   4.10 day_e, month_e, year_e: (observes same format as 4.6 - 4.8) <br>
+   -- ending date, inclusive, applicable only to special items <br>
    <br>
    Really important to observe the exact format when using 'add' command.
 
-5. Using 'add' command <br> 
+6. Using 'add' command <br> 
    5.1 add p <day_of_week> <block_> <time_> <mode_> <name_> <br> 
    5.2 add d <block_> <time_> <day_> <month_> <year_> <mode_> <name_> <br> 
    5.3 add w <day_> <month_> <year_> <mode_> <name_> REMEMBER THIS DATE MUST BE A SUNDAY <br> 

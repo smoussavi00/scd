@@ -14,7 +14,7 @@ NOTES:
    3.4 -month, m- are monthly items, spans a month      \
    3.5 -special, s- are commitments with user-defined start and end dates (e.g. between the 4th of January 2024 and the 9th of May 2024 I must tend to such and such commitment)
 
-4. Schedule items can contain the follow fields + format     <br>
+4. Schedule items can contain the follow fields (including format)     <br>
    4.1 name: max 37 characters     <br>
    4.2 block: 01-48, duration in number of consecutive 30-second blocks, applicable only to primary and day items (e.g. block = 03 means an event takes 90 minutes)    <br>
    4.3 time: 00:00-23:59, military time (e.g. 07:05 or 17:05)    <br>

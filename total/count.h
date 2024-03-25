@@ -13,10 +13,10 @@ struct scd_count{
     int num_w;
     int num_m;
     int num_s;
-    int num_docket;
 };
 
 void load_scd_count(struct scd_count* nums);
+void commit_scd_count(struct scd_count* nums);
 
 
 #endif

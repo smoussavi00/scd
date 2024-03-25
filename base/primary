@@ -1,22 +1,22 @@
-**Sun
-01 05:00 Event A
-01 17:00 Event F
-::ALT
-**Mon
-01 07:30 Event B
-01 19:30 Event G
-**Tue
-03 14:00 Event A
-01 17:00 Event C
-**Wed
-01 07:30 Event E
-01 08:00 Event H
-**Thu
-03 14:00 Event D
-02 21:00 Event B
-**Fri
-02 21:00 Event A
-03 22:00 Event C
-**Sat
-01 16:00 Event H
-01 18:00 Event G
+0 01 05:00 00 Event A
+0 04 11:00 00 Event B
+0 03 14:00 00 Event C
+0 01 17:00 00 Event A
+0 05 19:30 01 Event D 
+1 01 07:30 00 Event A
+1 03 10:00 00 Event C
+1 03 14:00 00 Event E
+1 05 19:30 01 Event F
+2 03 14:00 00 Event A
+2 01 17:00 00 Event D
+3 01 07:30 00 Event C
+3 03 10:00 00 Event B
+3 02 16:00 00 Event A
+3 01 17:00 00 Event G
+3 02 22:00 00 Event F
+4 03 14:00 00 Event G
+4 01 17:00 00 Event B
+5 01 17:00 00 Event D
+5 02 18:00 00 Event A
+6 01 16:00 00 Event F
+6 01 17:00 00 Event A

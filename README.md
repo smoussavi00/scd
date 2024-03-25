@@ -19,7 +19,7 @@ NOTES:
    4.2 block: 01-48, duration in number of consecutive 30-second blocks, applicable only to primary and day items (e.g. block = 03 means an event takes 90 minutes)    <br>
    4.3 time: 00:00-23:59, military time (e.g. 07:05 or 17:05)    <br>
    4.4 day_of_week: 0-6, where 0 represents Sunday, applicable only to primary items <br>
-   4.5 mode: 00-63, no definite functionality other than cool colours. Leave at 0 for most things. <br>
+   4.5 mode: 00-63, leave at 0 for most things, no definite functionality other than cool colours, will be useful later <br>
    4.6 day: 00-31 <br>
    4.7 month: 01-12 <br> 
    4.8 year: 0000-9999 <br>
@@ -33,8 +33,22 @@ NOTES:
    5.2 add d <block_> <time_> <day_> <month_> <year_> <mode_> <name_> <br> 
    5.3 add w <day_> <month_> <year_> <mode_> <name_> REMEMBER THIS DATE MUST BE A SUNDAY <br> 
    5.4 add m <month_> <year_> <mode_> <name_> <br> 
-   5.5 add s <day_s> <month_s> <year_s> <day_e> <month_e> <year_e> <mode> <name>  <br> 
-   
+   5.5 add s <day_s> <month_s> <year_s> <day_e> <month_e> <year_e> <mode> <name>  <br> <br>
+
+   For example <br><br>
+   add p 1 02 07:00 00 Event A <br>
+   (Every monday, for 60 minutes, starting 7:00 AM, mode 0 (ignore this), do Event A) <br><br>
+   add d 01 20:00 17 02 2024 00 Event B <br>
+   (On the 17th of February 2024, for 30 minutes, starting 8:00 PM, mode 0 (ignore this), do Event B) <br><br>
+   add w 11 02 2024 01 Commitment A <br>
+   (For the week defined by its sunday on the 11th of February 2024, mode 1 (ignore this), you have Commitment A) <br><br>
+   add m 03 2024 00 Commitment B  <br>
+   (For March 2024, mode 0 (ignore this), you have Commitment B) <br><br>
+   add s 03 02 2024 05 04 2024 00 Commitment C <br>
+   (Between February 3rd 2024 and April 5th 2024, mode 0 (ignore this), you have Commitment C) <br><br>
+
+   The items are stored in this format, look at the base files for reference.
+
 
 
 

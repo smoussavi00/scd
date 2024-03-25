@@ -89,6 +89,15 @@ void add_item_week(struct scd_count* nums, struct secondaries* sec, int day, int
 void add_item_month(struct scd_count* nums, struct secondaries* sec, int month, int year, char* name, int mode);
 void add_item_special(struct scd_count* nums, struct secondaries* sec, int day_s, int month_s, int year_s, int day_e, int month_e, int year_e, char* name, int mode);
 
+void load_tm(struct tm* ct);
+
+
+int find_primary(struct scd_count* nums, struct scd_item_p* scd_p, int dw, int hour, int min);
+int find_day(struct scd_count* nums, struct secondaries* sec, int d, int m, int y, int hour, int min);
+int find_week(struct scd_count* nums, struct secondaries* sec, int d, int m, int y, char* name);
+int find_month(struct scd_count* nums, struct secondaries* sec, int m, int y, char* name);
+int find_special(struct scd_count* nums, struct secondaries* sec, int d_s, int m_s, int y_s, int d_e, int m_e, int y_e, char* name);
+
 void del_item_primary(struct scd_count* nums, struct scd_item_p* scd_p, int i);
 void del_item_day(struct scd_count* nums, struct secondaries* sec, int i);
 void del_item_week(struct scd_count* nums, struct secondaries* sec, int i);
@@ -100,7 +109,5 @@ void commit_items_day(struct scd_count* nums, struct secondaries* sec);
 void commit_items_week(struct scd_count* nums, struct secondaries* sec);
 void commit_items_month(struct scd_count* nums, struct secondaries* sec);
 void commit_items_special(struct scd_count* nums, struct secondaries* sec);
-
-void load_tm(struct tm* ct);
 
 #endif

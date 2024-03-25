@@ -79,6 +79,26 @@ int main(void){
         else if(strncmp(buf,"add s",5) == 0){
             buf[strcspn(buf, "\n")] = 0;
             add_item_special(nums,sec,atoi(buf+6),atoi(buf+9),atoi(buf+12),atoi(buf+17),atoi(buf+20),atoi(buf+23),buf+31,atoi(buf+28));
+        } 
+        else if(strncmp(buf,"delete p",8) == 0){
+            buf[strcspn(buf, "\n")] = 0;
+            del_item_primary(nums,scd_p,find_primary(nums,scd_p,atoi(buf+9),atoi(buf+11),atoi(buf+14)));
+        } 
+        else if(strncmp(buf,"delete d",8) == 0){
+            buf[strcspn(buf, "\n")] = 0;
+            del_item_day(nums,sec,find_day(nums,sec,atoi(buf+15),atoi(buf+18),atoi(buf+21),atoi(buf+9),atoi(buf+12)));
+        } 
+        else if(strncmp(buf,"delete w",8) == 0){
+            buf[strcspn(buf, "\n")] = 0;
+            del_item_week(nums,sec,find_week(nums,sec,atoi(buf+9),atoi(buf+12),atoi(buf+15),buf+20));
+        }
+        else if(strncmp(buf,"delete m",8) == 0){
+            buf[strcspn(buf, "\n")] = 0;
+            del_item_month(nums,sec,find_month(nums,sec,atoi(buf+9),atoi(buf+12),buf+17));
+        }
+        else if(strncmp(buf,"delete s",8) == 0){
+            buf[strcspn(buf, "\n")] = 0;
+            del_item_special(nums,sec,find_special(nums,sec,atoi(buf+9),atoi(buf+12),atoi(buf+15),atoi(buf+20),atoi(buf+23),atoi(buf+26),buf+31));
         }
 
     }
@@ -515,9 +535,10 @@ int day_items(int page, struct scd_count* nums, struct scd_item_p* scd_p, struct
         csi_p = (void *) scd_p + scd_p_len*(l1[i]);   
     }
 
-    if(has_also == 2 && c >= min && c <= max){
-        printf("\n");  
-    } c++;
+    if(has_also == 2){
+        if(c >= min && c <= max) printf("\n");  
+        c++;
+    } 
 
     for(int i = 0 ; i < k2; i++){
         mode_colour(csi_d->mode,col);
@@ -527,9 +548,10 @@ int day_items(int page, struct scd_count* nums, struct scd_item_p* scd_p, struct
         csi_d = (void *) (sec->scd_d) + scd_d_len*(l2[i]);  
     }
 
-    if(has_entry && c >= min && c <= max){
-        printf("\n");  
-    } c++;
+    if(has_entry){
+        if(c >= min && c <= max) printf("\n");  
+        c++;
+    } 
 
     int d_sun, m_sun, y_sun;
     nearest_sunday(d,m,y,&d_sun,&m_sun,&y_sun);
@@ -675,6 +697,78 @@ void load_tm(struct tm* ct){
     current_time_s = ctime(&current_time);
 
     strptime(current_time_s, "%a %h %d %H:%M:%S %Y", ct);
+}
+
+int find_primary(struct scd_count* nums, struct scd_item_p* scd_p, int dw, int hour, int min){
+    
+    struct scd_item_p* csi = NULL;
+    int scd_p_len = sizeof(*scd_p);
+    
+    for(int i = 0; i < nums->num_p; i++){
+        csi = (void *) scd_p + scd_p_len*i;
+        if(csi->hour == hour && csi->min == min && csi->day_of_week == dw){
+            return i;
+        }
+    }
+    return -1;
+ 
+}
+
+int find_day(struct scd_count* nums, struct secondaries* sec, int d, int m, int y, int hour, int min){
+
+    struct scd_item_d* csi = NULL;
+    int scd_d_len = sizeof(*(sec->scd_d));
+
+    for(int i = 0; i < nums->num_d; i++){
+        csi = (void *) (sec->scd_d) + scd_d_len*i;
+        if(csi->hour == hour && csi->min == min && csi->day == d && csi->month == m && csi->year == y){
+            return i;
+        }
+    }
+    return -1;
+
+}
+
+int find_week(struct scd_count* nums, struct secondaries* sec, int d, int m, int y, char* name){
+    
+    struct scd_item_w* csi = NULL;
+    int scd_w_len = sizeof(*(sec->scd_w));
+
+    for(int i = 0; i < nums->num_w; i++){
+        csi = (void *) (sec->scd_w) + scd_w_len*i;
+        if(csi->day == d && csi->month == m && csi->year == y && strncmp(name,csi->name,strlen(csi->name)) == 0){
+            return i;
+        }
+    }
+    return -1;
+}
+
+int find_month(struct scd_count* nums, struct secondaries* sec, int m, int y, char* name){
+    
+    struct scd_item_m* csi = NULL;
+    int scd_m_len = sizeof(*(sec->scd_m));
+
+    for(int i = 0; i < nums->num_m; i++){
+        csi = (void *) (sec->scd_m) + scd_m_len*i;
+        if(csi->month == m && csi->year == y && strncmp(name,csi->name,strlen(csi->name)) == 0){
+            return i;
+        }
+    }
+    return -1;   
+}
+
+int find_special(struct scd_count* nums, struct secondaries* sec, int d_s, int m_s, int y_s, int d_e, int m_e, int y_e, char* name){
+        
+    struct scd_item_s* csi = NULL;
+    int scd_s_len = sizeof(*(sec->scd_s));
+
+    for(int i = 0; i < nums->num_s; i++){
+        csi = (void *) (sec->scd_s) + scd_s_len*i;
+        if(csi->day_s == d_s && csi->month_s == m_s && csi->year_s == y_s && csi->day_e == d_e && csi->month_e == m_e && csi->year_e == y_e && strncmp(name,csi->name,strlen(csi->name))==0){
+            return i;
+        }
+    }
+    return -1;
 }
 
 void del_item_primary(struct scd_count* nums, struct scd_item_p* scd_p, int i){

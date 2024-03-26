@@ -62,7 +62,7 @@
 
 Notes:
 A) Everything after the 'delete x' command is assumed to uniquely identify each schedule item (again, this is not yet enforced, but will in the future) <br>
-B) This would also mean that the user is trusted to not 'add' two or more schedule items with the same identifier such as two primary events on Sunday at 15:00 but with different names (also, not yet enforced)
+B) This would also mean that the user is trusted to not 'add' two or more schedule items with the same identifier such as two primary events on Sunday at 15:00 but with different names (also, not yet enforced) <br>
 C) There is no error checking for the 'add' and 'delete' commands, for now make sure your command is formatted correctly. (soon to be handled)
 
 
